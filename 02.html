@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Three Bodies</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;overflow:hidden;background:#090b18;color:#f5f5f4;font-family:system-ui,sans-serif}canvas{display:block;width:100vw;height:100vh;touch-action:none}.panel{position:fixed;top:10px;left:10px;width:255px;padding:9px;border:1px solid #ffffff35;border-radius:7px;background:#090b18c9;backdrop-filter:blur(8px)}.row{display:grid;grid-template-columns:1fr auto;gap:7px;margin-bottom:7px}button{min-height:33px;padding:5px 9px;border:1px solid #ffffff42;border-radius:4px;background:#25283a;color:white;font:700 12px system-ui;cursor:pointer}button:first-child{background:#a9313b}.status{height:4px;background:#2b2e40;margin-bottom:7px;overflow:hidden}.status i{display:block;height:100%;background:#ff5764;transition:width .2s}label{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:5px;color:#aaa;font:700 10px ui-monospace,monospace}input{width:100%;accent-color:#ff5764}.state{text-align:center;color:#aeb3cc;font:700 10px ui-monospace,monospace;letter-spacing:.08em}@media(max-width:520px){.panel{width:220px;padding:7px}}
+</style></head><body>
+<canvas id="c" aria-label="Interactive canvas animation"></canvas>
+<div class="panel"><div class="status"><i id="damage"></i></div><div class="row"><button id="disturb">Disturb 0/6</button><button id="reset">Reset</button></div><label><span id="parallaxOut">×0.0</span><input id="parallax" type="range" min="0" max="1" step=".05" value="0"></label><div class="state" id="state">COHERENT</div></div>
+<script>
+const canvas=document.querySelector('#c'),ctx=canvas.getContext('2d'),parallax=document.querySelector('#parallax'),parallaxOut=document.querySelector('#parallaxOut'),damageBar=document.querySelector('#damage'),state=document.querySelector('#state'),disturbBtn=document.querySelector('#disturb');
+let bodies=[],theta=0,damage=0,terminal=false,last=performance.now();
+const colors=['#ff526f','#55d6be','#6987ff'];
+function resize(){const d=devicePixelRatio||1;canvas.width=innerWidth*d;canvas.height=innerHeight*d}addEventListener('resize',resize);resize();
+function center(){return [canvas.width/2,canvas.height/2]}
+function reset(){const c=center(),orbit=Math.min(canvas.width,canvas.height)*.085;bodies=colors.map((color,i)=>{const a=theta+i*Math.PI*2/3;return{x:c[0]+Math.cos(a)*orbit,y:c[1]+Math.sin(a)*orbit,vx:0,vy:0,color:color,trail:[],index:i}});damage=0;terminal=false;damageBar.style.width='0%';disturbBtn.textContent='Disturb 0/6';state.textContent='COHERENT';}
+reset();
+function target(i,orbit){const c=center(),a=theta+i*Math.PI*2/3;return[c[0]+Math.cos(a)*orbit,c[1]+Math.sin(a)*orbit]}
+function disturb(){if(terminal){reset();return}damage=Math.min(6,damage+1);const c=center();let best=0,bd=1e30;for(let i=0;i<3;i++){const dx=bodies[i].x-c[0],dy=bodies[i].y-c[1],q=dx*dx+dy*dy;if(q<bd){bd=q;best=i}}const b=bodies[(best+damage-1)%3],a=Math.atan2(b.y-c[1],b.x-c[0])+(damage%2?-.42:.55),kick=(150+damage*55)*(devicePixelRatio||1);b.vx+=Math.cos(a)*kick;b.vy+=Math.sin(a)*kick;damageBar.style.width=(damage/6*100)+'%';disturbBtn.textContent='Disturb '+damage+'/6';state.textContent=damage<3?'CORRECTING':damage<5?'ENDANGERED':damage<6?'FAILING':'TERMINAL';if(damage>=6)terminal=true}
+canvas.addEventListener('pointerdown',disturb);disturbBtn.addEventListener('click',e=>{e.stopPropagation();disturb()});document.querySelector('#reset').onclick=e=>{e.stopPropagation();reset()};parallax.oninput=()=>parallaxOut.textContent='×'+Number(parallax.value).toFixed(1);
+function frame(now){const dpr=devicePixelRatio||1,raw=Math.min((now-last)/1000,.04),dt=raw;last=now;const orbit=Math.min(canvas.width,canvas.height)*.085,disc=Math.min(canvas.width,canvas.height)*.13;
+if(!terminal){theta+=dt*.42;const cohesion=Math.max(.5,8.8-damage*1.35);for(let i=0;i<3;i++){const b=bodies[i],t=target(i,orbit),ax=(t[0]-b.x)*cohesion,ay=(t[1]-b.y)*cohesion;b.vx+=(ax-b.vx*2.7)*dt;b.vy+=(ay-b.vy*2.7)*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.trail.push([b.x,b.y]);if(b.trail.length>220)b.trail.shift()}}else if(terminal){for(const b of bodies){b.vx*=.992;b.vy*=.992;b.x+=b.vx*raw;b.y+=b.vy*raw;b.trail.push([b.x,b.y]);if(b.trail.length>220)b.trail.shift()}}
+ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#090b18';ctx.fillRect(0,0,canvas.width,canvas.height);
+const parallaxFactor=Number(parallax.value);
+const bodiesWithZ=bodies.map(b=>({...b,z:Math.sin(theta+b.index*2*Math.PI/3)}));
+bodiesWithZ.sort((a,b)=>a.z-b.z);
+for(const b of bodiesWithZ){if(b.trail.length>1){ctx.beginPath();for(let j=0;j<b.trail.length;j++){const p=b.trail[j];j?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])}const trailScale=1+parallaxFactor*b.z*.3;ctx.strokeStyle=b.color+'38';ctx.lineWidth=3*dpr*trailScale;ctx.stroke()}}
+ctx.globalCompositeOperation='screen';
+for(const b of bodiesWithZ){ctx.beginPath();const radiusScale=1+parallaxFactor*b.z*.5;ctx.arc(b.x,b.y,disc*radiusScale,0,Math.PI*2);ctx.fillStyle=b.color+'69';ctx.fill();ctx.strokeStyle=b.color;ctx.lineWidth=3*dpr;ctx.stroke()}
+ctx.globalCompositeOperation='source-over';
+const c=center();ctx.beginPath();ctx.arc(c[0],c[1],7*dpr,0,Math.PI*2);ctx.fillStyle=terminal?'#ff394c':'#fff';ctx.fill();
+if(terminal){ctx.fillStyle='#ff263b18';ctx.fillRect(0,0,canvas.width,canvas.height)}
+requestAnimationFrame(frame)}requestAnimationFrame(frame);
+</script></body></html>
