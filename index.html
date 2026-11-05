@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Three Bodies â Spiral Worlds</title>
+<title>Three Bodies &#8212; Spiral Worlds</title>
 <!--
-  Spiral viewer v1 â the cart.
+  Spiral viewer v1 &#8212; the cart.
   Each world is a standalone self-contained HTML file; this page frames one at a
   time and supplies the NEXT / PREV rail. Adding a world = adding a file + one
   row in the WORLDS list. No build step, no dependencies, no backend.
-  Controls: PREV / NEXT buttons, â â arrow keys, CYCLE auto-advances every 20s,
-  â opens the current world standalone. The URL hash deep-links (#03).
+  Controls: PREV / NEXT buttons, &#8592; &#8594; arrow keys, CYCLE auto-advances every 20s,
+  &#8599; opens the current world standalone. The URL hash deep-links (#03).
 -->
 <style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#090b18;color:#f5f5f4;font-family:system-ui,sans-serif}
@@ -26,14 +26,14 @@ border:1px solid #ffffff42;border-radius:4px;white-space:nowrap}
 a:hover{background:#3a3e55}
 @media(max-width:600px){#pos{min-width:100px;font-size:10px}button,a{padding:5px 8px}}
 </style></head><body>
-<div id="load">LOADINGâ¦</div>
+<div id="load">LOADING&#8230;</div>
 <iframe id="stage" title="Three-body world"></iframe>
 <div class="bar">
-<button id="prev" title="Previous world (â)">â¹ PREV</button>
+<button id="prev" title="Previous world (&#8592;)">&#8249; PREV</button>
 <div id="pos">01 / 08</div>
-<button id="next" class="acc" title="Next world (â)">NEXT âº</button>
+<button id="next" class="acc" title="Next world (&#8594;)">NEXT &#8250;</button>
 <button id="cycle" title="Auto-advance every 20 seconds">CYCLE: OFF</button>
-<a id="solo" href="01.html" target="_blank" rel="noopener" title="Open this world standalone">â</a>
+<a id="solo" href="01.html" target="_blank" rel="noopener" title="Open this world standalone">&#8599;</a>
 </div>
 <script>
 const WORLDS=[
@@ -41,7 +41,7 @@ const WORLDS=[
 {file:'02.html',name:'Relationship Space'},
 {file:'03.html',name:'Figure Eight'},
 {file:'04.html',name:'Moth I'},
-{file:'05.html',name:'BrouckeâHÃ©non'},
+{file:'05.html',name:'Broucke\u2013H\u00e9non'},
 {file:'06.html',name:'Lagrange Triangle'},
 {file:'07.html',name:'Newest'},
 {file:'08.html',name:'Yin-Yang I'}
@@ -54,8 +54,8 @@ function pad(n){return (n<10?'0':'')+n}
 function show(k){
 i=(k+WORLDS.length)%WORLDS.length;
 stage.src=WORLDS[i].file;
-loadEl.textContent='LOADINGâ¦';
-pos.textContent=pad(i+1)+' / '+pad(WORLDS.length)+' Â· '+WORLDS[i].name;
+loadEl.textContent='LOADING\u2026';
+pos.textContent=pad(i+1)+' / '+pad(WORLDS.length)+' \u00b7 '+WORLDS[i].name;
 solo.href=WORLDS[i].file;
 history.replaceState(null,'','#'+pad(i+1));
 }
