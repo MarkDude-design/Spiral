@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Three Bodies &#8212; Lentic</title>
+<!--
+  Spiral 10 &#8212; Lentic
+  Source: first concept (recovered original two-anchors-one-weaver,
+  Project-Spiral experiments/2026-10-28/spiral-original-two-anchors-one-weaver.html),
+  dials restored from Figure Eight Organism 01 (Project-Spiral index.html:
+  speed + trail length + pause), vocabulary from the calm-room water series
+  (calm-room / still-water repos, Oct 2026: lentic -> settling -> quiescent;
+  sediment). Z's own take on the spirit of the original, 2026-11-05.
+  Convention: designed kinematic geometry, not physical gravity. Two fixed
+  stones and one moonlit weaver tracing a figure eight. A disturbance drops a
+  stone: ripple rings, a damped jolt, a small twist, and a slowly earned
+  persistent sediment bias in the weave (memory, max 8 stones).
+  Verification receipt: functional port QA headless (qa10.js): state ladder
+  LENTIC -> SETTLING -> QUIESCENT / SEDIMENTED, trail + speed + pause dials
+  honored, reset clears the pond. No orbit-integration check applies to
+  designed geometry.
+  Honest limits: reported states, not theater; quiescent is a condition, not
+  an achievement; the pond never disperses &#8212; memory is sediment, not damage.
+-->
+<style>
+*{box-sizing:border-box}html,body{margin:0;overflow:hidden;background:#090b18;color:#f5f5f4;font-family:system-ui,sans-serif}canvas{display:block;width:100vw;height:100vh;touch-action:none}.panel{position:fixed;top:10px;left:10px;width:255px;padding:9px;border:1px solid #ffffff35;border-radius:7px;background:#090b18c9;backdrop-filter:blur(8px)}.row{display:grid;grid-template-columns:1fr auto;gap:7px;margin-bottom:7px}.row.r3{grid-template-columns:1fr 1fr 1fr}button{min-height:33px;padding:5px 9px;border:1px solid #ffffff42;border-radius:4px;background:#25283a;color:white;font:700 12px system-ui;cursor:pointer}button:first-child{background:#a9313b}.status{height:4px;background:#2b2e40;margin-bottom:7px;overflow:hidden}.status i{display:block;height:100%;background:#ff5764;transition:width .2s}label{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:5px;color:#aaa;font:700 10px ui-monospace,monospace;margin-top:7px}input{width:100%;accent-color:#ff5764}.state{text-align:center;color:#aeb3cc;font:700 10px ui-monospace,monospace;letter-spacing:.08em;margin-top:7px}@media(max-width:520px){.panel{width:220px;padding:7px}}
+</style></head><body>
+<canvas id="c" aria-label="Still pond with two stones and one moonlit weaver; disturbances drop stones and ripple the water"></canvas>
+<div class="panel"><div class="status"><i id="marks"></i></div><div class="row r3"><button id="disturb">Disturb</button><button id="pause">Pause</button><button id="reset">Reset</button></div><label><span id="weaveOut">100%</span><input id="weave" type="range" min="55" max="130" step="1" value="100"></label><label><span id="trailOut">480</span><input id="trail" type="range" min="40" max="900" step="20" value="480"></label><label><span id="speedOut">&#215;1.0</span><input id="speed" type="range" min="0.25" max="3" step="0.05" value="1"></label><div class="state" id="state">LENTIC</div></div>
+<script>
+const canvas=document.querySelector('#c'),ctx=canvas.getContext('2d'),
+weave=document.querySelector('#weave'),weaveOut=document.querySelector('#weaveOut'),
+trailD=document.querySelector('#trail'),trailOut=document.querySelector('#trailOut'),
+speed=document.querySelector('#speed'),speedOut=document.querySelector('#speedOut'),
+marksBar=document.querySelector('#marks'),stateEl=document.querySelector('#state'),
+disturbBtn=document.querySelector('#disturb'),pauseBtn=document.querySelector('#pause');
+let W=0,H=0,DPR=1,cx=0,cy=0,Rx=0,Ry=0,gap=0,phase=0,prior=performance.now(),time=0,paused=false;
+let jx=0,jy=0,kx=0,ky=0,twist=0,twistV=0,sediment=0;
+const trail=[],stones=[],ripples=[];
+let bgGrad=null;
+function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(2,devicePixelRatio||1);
+canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);
+ctx.setTransform(DPR,0,0,DPR,0,0);cx=W/2;cy=H*(W<700?.45:.54);
+Rx=Math.min(W*.345,385);Ry=Math.min(H*.225,Rx*.445,176);gap=Rx*.69;trail.length=0;
+bgGrad=ctx.createRadialGradient(cx,cy*.9,Rx*.2,cx,cy,Math.max(W,H)*.75);
+bgGrad.addColorStop(0,'#132b2b');bgGrad.addColorStop(1,'#081314')}
+function wrap(a,b){return Math.atan2(Math.sin(a-b),Math.cos(a-b))}
+function base(t){const s=Number(weave.value)/100;
+const x=Rx*s*Math.sin(t),y=-Ry*s*Math.sin(2*t);
+const remembered=sediment*Rx*.045*Math.sin(t)*Math.sin(t);
+return{x:x+remembered,y}}
+function point(t=phase){const p=base(t),co=Math.cos(twist),si=Math.sin(twist);
+return{x:cx+p.x*co-p.y*si+jx,y:cy+p.x*si+p.y*co+jy}}
+function setState(txt){if(stateEl.textContent!==txt)stateEl.textContent=txt}
+function drawMarks(){marksBar.style.width=(stones.length/8*100)+'%'}
+function disturb(x=cx,y=cy){stones.push({x,y,t:0});
+if(stones.length>8)stones.shift();
+ripples.push({x,y,t:0});
+const angle=Math.atan2(y-cy,x-cx)+(stones.length%2?-.5:.5);
+kx+=Math.cos(angle)*2.1;ky+=Math.sin(angle)*2.1;
+twistV+=stones.length%2?.016:-.02;
+sediment=Math.min(1,sediment+.13);
+setState('SETTLING');drawMarks()}
+function reset(){phase=0;time=0;jx=jy=kx=ky=twist=twistV=0;sediment=0;
+stones.length=trail.length=ripples.length=0;
+paused=false;pauseBtn.textContent='Pause';
+prior=performance.now();setState('LENTIC');drawMarks()}
+function bpath(fn){ctx.beginPath();for(let i=0;i<=250;i++){const a=i*Math.PI*2/250;
+const p=fn(a);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)}}
+function draw(){ctx.fillStyle=bgGrad;ctx.fillRect(0,0,W,H);
+// stillness strata: faint horizontal water bands
+ctx.lineWidth=1;for(let i=-16;i<=16;i++){const y=cy+i*30;
+ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.strokeStyle='rgba(150,195,185,.035)';ctx.stroke()}
+// dashed reference weave
+ctx.setLineDash([3,10]);ctx.strokeStyle='rgba(190,215,205,.12)';ctx.lineWidth=1.3;
+bpath(t=>{const s=Number(weave.value)/100;return{x:cx+Rx*s*Math.sin(t),y:cy-Ry*s*Math.sin(2*t)}});
+ctx.stroke();ctx.setLineDash([]);
+// the moonlit thread: accumulated, not theoretical
+if(trail.length>1){for(let i=1;i<trail.length;i++){const p=trail[i-1],q=trail[i],age=i/trail.length;
+ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.lineCap='round';
+ctx.lineWidth=age>.8?1.9:.95;ctx.strokeStyle='rgba(230,220,196,'+(.05+.6*Math.pow(age,2.4))+')';ctx.stroke()}
+const i0=Math.max(0,trail.length-55);ctx.beginPath();
+for(let j=i0;j<trail.length;j++){const p=trail[j];j===i0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)}
+ctx.strokeStyle='rgba(255,244,214,.5)';ctx.lineWidth=2.4;ctx.stroke()}
+// the two fixed stones
+for(let j=0;j<2;j++){const x=cx+(j?gap:-gap);
+ctx.beginPath();ctx.ellipse(x,cy,26,18,0,0,Math.PI*2);
+ctx.fillStyle='#3d4647';ctx.fill();ctx.strokeStyle='#6f7c78';ctx.lineWidth=1.4;ctx.stroke();
+ctx.beginPath();ctx.ellipse(x-7,cy-6,9,5,-.5,0,Math.PI*2);
+ctx.fillStyle='rgba(194,204,196,.28)';ctx.fill()}
+// dropped pebbles settle into sediment
+for(const s of stones){const settle=Math.min(1,s.t);
+ctx.beginPath();ctx.ellipse(s.x,s.y,7+2*(1-settle),5+1.5*(1-settle),0,0,Math.PI*2);
+ctx.fillStyle='rgba(90,102,98,'+(.5+.4*settle)+')';ctx.fill();
+if(settle<1){ctx.beginPath();ctx.arc(s.x,s.y,10+26*(1-settle),0,Math.PI*2);
+ctx.strokeStyle='rgba(210,230,220,'+(.25*(1-settle))+')';ctx.lineWidth=1;ctx.stroke()}}
+// ripple rings
+for(let j=ripples.length-1;j>=0;j--){const p=ripples[j],r=20+150*p.t;
+ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
+ctx.strokeStyle='rgba(210,230,220,'+Math.max(0,.4*(1-p.t))+')';ctx.lineWidth=1.2;ctx.stroke()}
+// ambient lentic breath: one slow ring from each stone, alternating
+const amb=(time%12);
+if(amb<5){const t=amb/5,x=cx-gap;ctx.beginPath();ctx.arc(x,cy,30+90*t,0,Math.PI*2);
+ctx.strokeStyle='rgba(180,210,200,'+(.06*(1-t))+')';ctx.lineWidth=1;ctx.stroke()}
+if(amb>=6&&amb<11){const t=(amb-6)/5,x=cx+gap;ctx.beginPath();ctx.arc(x,cy,30+90*t,0,Math.PI*2);
+ctx.strokeStyle='rgba(180,210,200,'+(.06*(1-t))+')';ctx.lineWidth=1;ctx.stroke()}
+// the moonlit weaver
+const p=point();const angle=Math.atan2(-2*Ry*Math.cos(2*phase),Rx*Math.cos(phase));
+ctx.save();ctx.translate(p.x,p.y);ctx.rotate(angle);
+const g=ctx.createRadialGradient(0,0,2,0,0,30);
+g.addColorStop(0,'rgba(243,234,214,.22)');g.addColorStop(1,'rgba(243,234,214,0)');
+ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,30,0,7);ctx.fill();
+ctx.fillStyle='#f3ead6';ctx.beginPath();ctx.arc(0,0,6.5,0,Math.PI*2);ctx.fill();ctx.restore()}
+function tick(now){const raw=Math.min(.046,(now-prior)/1000||0);prior=now;
+if(!paused){const dt=raw*Number(speed.value);
+time+=dt;phase=(phase+dt*.84)%(Math.PI*2);
+kx+=(-jx*.034-kx*.17)*(dt*60);ky+=(-jy*.034-ky*.17)*(dt*60);
+jx+=kx*(dt*60);jy+=ky*(dt*60);
+twistV+=(-twist*.024-twistV*.14)*(dt*60);twist+=twistV*(dt*60);
+const p=point();trail.push({x:p.x,y:p.y});
+const cap=Number(trailD.value);while(trail.length>cap)trail.shift();
+for(const s of stones)if(s.t<1)s.t+=dt/2;
+for(let j=ripples.length-1;j>=0;j--){ripples[j].t+=dt/1.6;if(ripples[j].t>=1)ripples.splice(j,1)}
+const unrest=Math.abs(jx)+Math.abs(jy)+Math.abs(kx)*6+Math.abs(ky)*6+Math.abs(twist)*70;
+if(unrest>5)setState('SETTLING');
+else setState(sediment>0?'QUIESCENT / SEDIMENTED':'LENTIC')}
+draw();requestAnimationFrame(tick)}
+canvas.addEventListener('pointerdown',e=>disturb(e.clientX,e.clientY));
+disturbBtn.addEventListener('click',e=>{e.stopPropagation();disturb(cx+Rx*.15,cy-Ry*.42)});
+pauseBtn.addEventListener('click',e=>{e.stopPropagation();paused=!paused;pauseBtn.textContent=paused?'Resume':'Pause'});
+document.querySelector('#reset').onclick=e=>{e.stopPropagation();reset()};
+weave.oninput=()=>{weaveOut.textContent=weave.value+'%';trail.length=0};
+trailD.oninput=()=>{trailOut.textContent=trailD.value};
+speed.oninput=()=>{speedOut.textContent='\u00d7'+Number(speed.value).toFixed(1)};
+addEventListener('resize',resize);
+resize();reset();requestAnimationFrame(tick);
+</script></body></html>
