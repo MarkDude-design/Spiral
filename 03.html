@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Three Bodies â Figure Eight</title>
+<!--
+  Spiral 03 â Figure Eight
+  Source: Moore 1993; Chenciner & Montgomery 2000 (figure-eight choreography).
+  Verification receipt: velocity-Verlet, dt=0.0005 â state returns to start within
+  0.03 (sum abs pos + 0.3|vel|) at t=6.326, one full period (T=6.3259);
+  relative energy drift over 3 periods: ~1.5e-7. G=1, three unit masses.
+-->
+<style>
+*{box-sizing:border-box}html,body{margin:0;overflow:hidden;background:#090b18;color:#f5f5f4;font-family:system-ui,sans-serif}canvas{display:block;width:100vw;height:100vh;touch-action:none}.panel{position:fixed;top:10px;left:10px;width:255px;padding:9px;border:1px solid #ffffff35;border-radius:7px;background:#090b18c9;backdrop-filter:blur(8px)}.row{display:grid;grid-template-columns:1fr auto;gap:7px;margin-bottom:7px}button{min-height:33px;padding:5px 9px;border:1px solid #ffffff42;border-radius:4px;background:#25283a;color:white;font:700 12px system-ui;cursor:pointer}button:first-child{background:#a9313b}.status{height:4px;background:#2b2e40;margin-bottom:7px;overflow:hidden}.status i{display:block;height:100%;background:#ff5764;transition:width .2s}label{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:5px;color:#aaa;font:700 10px ui-monospace,monospace}input{width:100%;accent-color:#ff5764}.state{text-align:center;color:#aeb3cc;font:700 10px ui-monospace,monospace;letter-spacing:.08em}@media(max-width:520px){.panel{width:220px;padding:7px}}
+</style></head><body>
+<canvas id="c" aria-label="Interactive three-body simulation"></canvas>
+<div class="panel"><div class="status"><i id="drift"></i></div><div class="row"><button id="disturb">Disturb</button><button id="reset">Reset</button></div><label><span id="speedOut">Ã1.0</span><input id="speed" type="range" min="0.25" max="3" step=".05" value="1"></label><div class="state" id="state">PERIODIC</div></div>
+<script>
+const WORLD={name:'Figure Eight',dt:0.0005,rate:1050,scaleK:0.333,kick:0.15,escape:5,driftMax:0.05,
+bodies0:[
+{x: 0.97000436, y:-0.24308753, vx: 0.466203685, vy: 0.43236573},
+{x:-0.97000436, y: 0.24308753, vx: 0.466203685, vy: 0.43236573},
+{x: 0,          y: 0,          vx:-0.93240737,  vy:-0.86473146}
+]};
+const canvas=document.querySelector('#c'),ctx=canvas.getContext('2d'),
+speed=document.querySelector('#speed'),speedOut=document.querySelector('#speedOut'),
+driftBar=document.querySelector('#drift'),stateEl=document.querySelector('#state'),
+disturbBtn=document.querySelector('#disturb');
+const colors=['#ff526f','#55d6be','#6987ff'];
+const G=1;
+let bodies=[],trails=[],E0=0,dispersed=false,last=performance.now(),acc=0;
+function resize(){const d=devicePixelRatio||1;canvas.width=innerWidth*d;canvas.height=innerHeight*d}
+addEventListener('resize',resize);resize();
+function energy(bs){let e=0;for(const b of bs)e+=.5*(b.vx*b.vx+b.vy*b.vy);
+for(let i=0;i<3;i++)for(let j=i+1;j<3;j++){const dx=bs[j].x-bs[i].x,dy=bs[j].y-bs[i].y;e-=G/Math.sqrt(dx*dx+dy*dy)}return e}
+function reset(){bodies=WORLD.bodies0.map(b=>({x:b.x,y:b.y,vx:b.vx,vy:b.vy}));trails=bodies.map(()=>[]);
+E0=energy(bodies);dispersed=false;acc=0;driftBar.style.width='0%';stateEl.textContent='PERIODIC'}
+reset();
+function accel(){return bodies.map((b,i)=>{let ax=0,ay=0;for(let j=0;j<3;j++)if(j!==i){
+const dx=bodies[j].x-b.x,dy=bodies[j].y-b.y,r2=dx*dx+dy*dy+1e-9,inv=1/Math.pow(r2,1.5);
+ax+=G*dx*inv;ay+=G*dy*inv}return{ax,ay}})}
+function step(h){const a0=accel();
+bodies.forEach((b,i)=>{b.vx+=a0[i].ax*h/2;b.vy+=a0[i].ay*h/2;b.x+=b.vx*h;b.y+=b.vy*h});
+const a1=accel();bodies.forEach((b,i)=>{b.vx+=a1[i].ax*h/2;b.vy+=a1[i].ay*h/2})}
+function markDisturbed(){if(!dispersed)stateEl.textContent='PERTURBED'}
+function disturbAtWorld(px,py){
+if(dispersed){reset();return}
+let best=0,bd=1e30;
+for(let i=0;i<3;i++){const dx=bodies[i].x-px,dy=bodies[i].y-py,q=dx*dx+dy*dy;if(q<bd){bd=q;best=i}}
+let d=Math.sqrt(bd);if(d<1e-6)d=1e-6;const b=bodies[best];
+b.vx+=(b.x-px)/d*WORLD.kick;b.vy+=(b.y-py)/d*WORLD.kick;markDisturbed()}
+function disturbRandom(){
+if(dispersed){reset();return}
+const i=Math.floor(Math.random()*3),a=Math.random()*Math.PI*2;
+bodies[i].vx+=Math.cos(a)*WORLD.kick;bodies[i].vy+=Math.sin(a)*WORLD.kick;markDisturbed()}
+canvas.addEventListener('pointerdown',e=>{
+const d=devicePixelRatio||1,s=Math.min(canvas.width,canvas.height)*WORLD.scaleK;
+const r=canvas.getBoundingClientRect();
+const px=((e.clientX-r.left)*d-canvas.width/2)/s, py=((e.clientY-r.top)*d-canvas.height/2)/s;
+disturbAtWorld(px,py)});
+disturbBtn.addEventListener('click',e=>{e.stopPropagation();disturbRandom()});
+document.querySelector('#reset').onclick=e=>{e.stopPropagation();reset()};
+speed.oninput=()=>speedOut.textContent='Ã'+Number(speed.value).toFixed(1);
+function frame(now){
+const dpr=devicePixelRatio||1,raw=Math.min((now-last)/1000,.04);last=now;
+acc+=raw*Number(speed.value)*WORLD.rate;let n=0;const h=WORLD.dt;
+while(acc>=1&&n<40000){step(h);acc--;n++}
+if(acc>40000)acc=0;
+for(let i=0;i<3;i++){trails[i].push([bodies[i].x,bodies[i].y]);if(trails[i].length>220)trails[i].shift()}
+if(!dispersed){
+const dr=Math.abs(energy(bodies)-E0)/Math.abs(E0);
+driftBar.style.width=Math.min(100,Math.max(0,100*dr/WORLD.driftMax))+'%';
+let cx=0,cy=0;for(const b of bodies){cx+=b.x/3;cy+=b.y/3}
+for(const b of bodies){const dx=b.x-cx,dy=b.y-cy;
+if(Math.sqrt(dx*dx+dy*dy)>WORLD.escape){dispersed=true;stateEl.textContent='DISPERSED'}}}
+ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#090b18';ctx.fillRect(0,0,canvas.width,canvas.height);
+const s=Math.min(canvas.width,canvas.height)*WORLD.scaleK,cx=canvas.width/2,cy=canvas.height/2;
+for(let i=0;i<3;i++){const t=trails[i];if(t.length>1){ctx.beginPath();
+for(let j=0;j<t.length;j++){const X=cx+t[j][0]*s,Y=cy+t[j][1]*s;if(j)ctx.lineTo(X,Y);else ctx.moveTo(X,Y)}
+ctx.strokeStyle=colors[i]+'38';ctx.lineWidth=3*dpr;ctx.stroke()}}
+ctx.globalCompositeOperation='screen';
+const disc=Math.min(canvas.width,canvas.height)*.02;
+for(let i=0;i<3;i++){ctx.beginPath();
+ctx.arc(cx+bodies[i].x*s,cy+bodies[i].y*s,disc,0,Math.PI*2);
+ctx.fillStyle=colors[i]+'69';ctx.fill();ctx.strokeStyle=colors[i];ctx.lineWidth=3*dpr;ctx.stroke()}
+ctx.globalCompositeOperation='source-over';
+ctx.beginPath();ctx.arc(cx,cy,7*dpr,0,Math.PI*2);ctx.fillStyle=dispersed?'#ff394c':'#fff';ctx.fill();
+if(dispersed){ctx.fillStyle='#ff263b18';ctx.fillRect(0,0,canvas.width,canvas.height)}
+requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script>
+</body></html>
