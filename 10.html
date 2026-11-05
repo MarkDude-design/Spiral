@@ -19,6 +19,9 @@
   designed geometry.
   Honest limits: reported states, not theater; quiescent is a condition, not
   an achievement; the pond never disperses &#8212; memory is sediment, not damage.
+  Rev 2 (owner phone test 2026-11-05): settled stones now render with a pale
+  outline, a moonlit highlight, and a faint sediment ring &#8212; the first pass
+  left them near-invisible on dark water, which read as drops vanishing.
 -->
 <style>
 *{box-sizing:border-box}html,body{margin:0;overflow:hidden;background:#090b18;color:#f5f5f4;font-family:system-ui,sans-serif}canvas{display:block;width:100vw;height:100vh;touch-action:none}.panel{position:fixed;top:10px;left:10px;width:255px;padding:9px;border:1px solid #ffffff35;border-radius:7px;background:#090b18c9;backdrop-filter:blur(8px)}.row{display:grid;grid-template-columns:1fr auto;gap:7px;margin-bottom:7px}.row.r3{grid-template-columns:1fr 1fr 1fr}button{min-height:33px;padding:5px 9px;border:1px solid #ffffff42;border-radius:4px;background:#25283a;color:white;font:700 12px system-ui;cursor:pointer}button:first-child{background:#a9313b}.status{height:4px;background:#2b2e40;margin-bottom:7px;overflow:hidden}.status i{display:block;height:100%;background:#ff5764;transition:width .2s}label{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:5px;color:#aaa;font:700 10px ui-monospace,monospace;margin-top:7px}input{width:100%;accent-color:#ff5764}.state{text-align:center;color:#aeb3cc;font:700 10px ui-monospace,monospace;letter-spacing:.08em;margin-top:7px}@media(max-width:520px){.panel{width:220px;padding:7px}}
@@ -86,16 +89,22 @@ ctx.beginPath();ctx.ellipse(x,cy,26,18,0,0,Math.PI*2);
 ctx.fillStyle='#3d4647';ctx.fill();ctx.strokeStyle='#6f7c78';ctx.lineWidth=1.4;ctx.stroke();
 ctx.beginPath();ctx.ellipse(x-7,cy-6,9,5,-.5,0,Math.PI*2);
 ctx.fillStyle='rgba(194,204,196,.28)';ctx.fill()}
-// dropped pebbles settle into sediment
+// dropped pebbles settle into visible sediment
 for(const s of stones){const settle=Math.min(1,s.t);
-ctx.beginPath();ctx.ellipse(s.x,s.y,7+2*(1-settle),5+1.5*(1-settle),0,0,Math.PI*2);
-ctx.fillStyle='rgba(90,102,98,'+(.5+.4*settle)+')';ctx.fill();
+const r=6.5+3*(1-settle),rr=4.5+2*(1-settle);
+ctx.beginPath();ctx.ellipse(s.x,s.y,r,rr,0,0,Math.PI*2);
+ctx.fillStyle='rgba(93,108,101,'+(.85+.15*settle)+')';ctx.fill();
+ctx.strokeStyle='rgba(222,232,218,.6)';ctx.lineWidth=1.2;ctx.stroke();
+ctx.beginPath();ctx.ellipse(s.x-r*.35,s.y-rr*.4,r*.4,rr*.32,-.4,0,Math.PI*2);
+ctx.fillStyle='rgba(238,244,232,.4)';ctx.fill();
+ctx.beginPath();ctx.arc(s.x,s.y,12,0,Math.PI*2);
+ctx.strokeStyle='rgba(210,230,220,'+(.08+.06*settle)+')';ctx.lineWidth=1;ctx.stroke();
 if(settle<1){ctx.beginPath();ctx.arc(s.x,s.y,10+26*(1-settle),0,Math.PI*2);
-ctx.strokeStyle='rgba(210,230,220,'+(.25*(1-settle))+')';ctx.lineWidth=1;ctx.stroke()}}
+ctx.strokeStyle='rgba(210,230,220,'+(.3*(1-settle))+')';ctx.lineWidth=1;ctx.stroke()}}
 // ripple rings
 for(let j=ripples.length-1;j>=0;j--){const p=ripples[j],r=20+150*p.t;
 ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
-ctx.strokeStyle='rgba(210,230,220,'+Math.max(0,.4*(1-p.t))+')';ctx.lineWidth=1.2;ctx.stroke()}
+ctx.strokeStyle='rgba(210,230,220,'+Math.max(0,.5*(1-p.t))+')';ctx.lineWidth=1.4;ctx.stroke()}
 // ambient lentic breath: one slow ring from each stone, alternating
 const amb=(time%12);
 if(amb<5){const t=amb/5,x=cx-gap;ctx.beginPath();ctx.arc(x,cy,30+90*t,0,Math.PI*2);
