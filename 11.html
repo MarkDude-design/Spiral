@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Three Bodies &#8212; Relationship Space (Lens)</title>
+<!--
+  Spiral 11 &#8212; Relationship Space (Lens)
+  Source: foundry round 2026-10-28 (Project-Spiral
+  experiments/2026-10-28/spiral-03-relationship-space.html; architect Meraki),
+  ported into the series by Z 2026-11-05, plus the FOLD AXIS ruler dial from
+  Z's numeric examination of the same date. Owner-ruled dial set: lens + ruler.
+  Examination receipts (verified to machine epsilon):
+  - Fold: M(t)=M(pi-t) exact to 8.9e-16. Generic measurement 2-to-1;
+    junction 4-to-1 at (0.690,0.690). Shadow = two retraced arcs (a bowtie).
+  - Ruler monodromy: rotating the anchor axis by pi swaps dA<->dB exactly
+    (1e-15). Unlabeled ruler space = circle; labeled = double cover; the
+    mapping cylinder of that 2-fold cover IS the classical MOBIUS band.
+    The twist lives in the observer's labeled ruler space, not the body's
+    path (the path fold is a mirror, not a twist). Turn the ruler to 180
+    degrees: same world, A and B swapped.
+  - Memory check: the remembered asymmetry breaks the fold. Sheet separation
+    in measurement space: 0.00000 (memory 0), 0.087 (0.05), 0.226 (0.13).
+    Disturb, then watch the teal and terracotta sheets separate.
+  Convention: designed kinematic geometry, not physical gravity.
+  Honest limits: the observer loses the pass distinction (2-to-1) and, after
+  disturbance, still cannot localize where the memory sits &#8212; only that it
+  exists. ASCII-only source by series rule.
+-->
+<style>
+:root{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#25343d;background:#f5f4ed}*{box-sizing:border-box}body{margin:0;overflow:hidden;min-height:100svh;background:radial-gradient(circle at 52% 55%,#fdfdf8 0,#f2f3ec 75%)}canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:manipulation;cursor:crosshair}.top{position:fixed;left:clamp(16px,4vw,54px);top:clamp(16px,4vh,38px);z-index:2;pointer-events:none;max-width:440px}.micro{font:800 10px ui-monospace,monospace;letter-spacing:.19em;color:#6d7b81}.top h1{margin:8px 0 7px;font-size:clamp(24px,3.8vw,44px);font-weight:650;letter-spacing:-.052em;line-height:1.05}.top p{font-size:clamp(10px,1.3vw,13px);color:#677780;line-height:1.45;margin:0;max-width:380px}
+.legend{position:fixed;right:4vw;top:5vh;z-index:2;pointer-events:none;font:700 10px ui-monospace,monospace;line-height:1.8;letter-spacing:.04em}.legend span{display:block}.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}.legend .a i{background:#278b99}.legend .b i{background:#bc7157}.legend .c i{background:#263d45}
+.controls{position:fixed;z-index:5;bottom:max(14px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(980px,calc(100vw - 26px));border:1px solid #d4d8d3;border-radius:15px;box-shadow:0 15px 45px #3d4b5130;background:#fffffff0;backdrop-filter:blur(12px);padding:12px 14px;display:grid;grid-template-columns:1fr 1.15fr 1.15fr .8fr;gap:10px 16px;align-items:center}.actions{display:flex;gap:6px}.actions button{flex:1;min-width:0;border:1px solid #b7c5c6;border-radius:8px;background:#fff;color:#30444a;padding:11px 8px;font:800 10px ui-monospace,monospace;cursor:pointer}.actions button:first-child{background:#263e46;border-color:#263e46;color:white}.actions button:hover{background:#e8eeec}.actions button:first-child:hover{background:#3b5860}.rangelabel{display:flex;justify-content:space-between;gap:4px;font:700 10px ui-monospace,monospace;letter-spacing:.03em;color:#52636b}input[type=range]{display:block;width:100%;accent-color:#278b99;margin-top:7px;cursor:pointer}.readout{position:fixed;z-index:2;bottom:116px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;font:700 11px ui-monospace,monospace;color:#566f78;letter-spacing:.04em;background:#ffffffac;padding:8px 14px;border-radius:20px;white-space:nowrap}.explain{position:fixed;left:4vw;bottom:126px;max-width:210px;color:#79888b;font:11px/1.45 ui-monospace,monospace;pointer-events:none}
+@media(max-width:760px){.legend{top:103px;right:17px;font-size:9px}.top{max-width:74vw}.controls{grid-template-columns:1fr 1fr;gap:8px}.actions{grid-column:1/-1}.readout{bottom:150px;font-size:9px}.explain{display:none}}
+@media(max-width:430px){.top h1{font-size:27px}.top p{font-size:10px;max-width:250px}.legend{display:none}.controls{padding:9px}.actions button{padding:9px 4px}.readout{white-space:normal;width:calc(100% - 50px)}}
+</style></head><body>
+<canvas id="scene" aria-label="The original figure eight reprojected from physical position into two distances from fixed anchors. Rotating the fold axis swaps the two anchors by 180 degrees."></canvas>
+<header class="top"><div class="micro">SPIRAL / 11 / OBSERVER INVERSION</div><h1>Relationship Space (Lens)</h1><p>What if you never saw the bodies&#8217; positions&#8212;only C&#8217;s distance to A and B? One world, two descriptions. Turn the ruler: at 180&#176; the labels swap. The twist is in the measurement, not the world.</p></header>
+<div class="legend"><span class="a"><i></i>A / FIXED REFERENCE</span><span class="b"><i></i>B / FIXED REFERENCE</span><span class="c"><i></i>C / WEAVER</span></div>
+<div class="readout" id="readout">RELATION LENS &#183; SOME MOTION IS HIDDEN</div><div class="explain">CLICK THE FIELD TO DISTURB.<br>TURN THE RULER TO 180&#176; &#8212; A AND B TRADE PLACES.<br>MOVE THE LENS TO SEE WHAT THE OBSERVER LOSES.</div>
+<div class="controls"><div class="actions"><button id="disturb">DISTURB</button><button id="pause">PAUSE</button><button id="reset">RESET</button></div><div><label class="rangelabel" for="lens">OBSERVATION LENS <output id="lensOut">100% DISTANCE</output></label><input id="lens" type="range" min="0" max="100" value="100"></div><div><label class="rangelabel" for="ruler">FOLD AXIS <output id="rulerOut">0&#176; RULER</output></label><input id="ruler" type="range" min="0" max="180" step="1" value="0"></div><div><label class="rangelabel" for="weave">WEAVE SIZE <output id="weaveOut">100%</output></label><input id="weave" type="range" min="65" max="125" value="100"></div></div>
+<script>
+(()=>{'use strict';
+const c=document.getElementById('scene'),ctx=c.getContext('2d'),lens=document.getElementById('lens'),lensOut=document.getElementById('lensOut'),ruler=document.getElementById('ruler'),rulerOut=document.getElementById('rulerOut'),weave=document.getElementById('weave'),weaveOut=document.getElementById('weaveOut'),readout=document.getElementById('readout'),pauseB=document.getElementById('pause');
+let W=0,H=0,DPR=1,cx=0,cy=0,S=1,phase=.02,time=0,paused=false,prior=performance.now(),jx=0,jy=0,kx=0,ky=0,memory=0,n=0;
+const TAU=Math.PI*2,history=[];
+function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(2,devicePixelRatio||1);c.width=Math.round(W*DPR);c.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);cx=W/2;cy=H*(W<760?.48:.55);S=Math.min(W*.275,H*.30,260);history.length=0}
+const mix=(a,b,t)=>a+(b-a)*t;
+function anchors(){const th=Number(ruler.value)*Math.PI/180,gap=.69;return{ax:-gap*Math.cos(th),ay:-gap*Math.sin(th),bx:gap*Math.cos(th),by:gap*Math.sin(th)}}
+function model(t,react=true){const z=Number(weave.value)/100;let x=z*Math.sin(t),y=-.45*z*Math.sin(2*t);y+=memory*Math.sin(t)**2;if(react){x+=jx;y+=jy}return{x,y}}
+function transforms(t,react=true){const {x,y}=model(t,react),a=anchors(),dA=Math.hypot(x-a.ax,y-a.ay),dB=Math.hypot(x-a.bx,y-a.by),l=Number(lens.value)/100;
+ // x/y: physical coordinates; dA/dB: distances to stationary A and B.
+ const px=x*1.47,py=y*1.95;const dx=(dA-1)*1.85,dy=(dB-1)*1.45;return{x:mix(px,dx,l),y:mix(py,dy,l),physicalX:x,physicalY:y,dA,dB}}
+function screen(p){return{x:cx+S*p.x,y:cy-S*p.y}}
+function disturb(){n++;const side=n%2?1:-1;kx+=side*.063;ky+=.065*(n%3-1);memory=Math.max(-.13,Math.min(.13,memory+side*.037));history.length=0;readout.textContent='DISTURBED \u00b7 YOUR MEASUREMENT CHANGES, TOO'}
+function reset(){phase=.02;time=0;jx=jy=kx=ky=memory=0;n=0;history.length=0;paused=false;pauseB.textContent='PAUSE';lens.value=100;ruler.value=0;weave.value=100;updateLabels();prior=performance.now()}
+function updateLabels(){const l=Number(lens.value),th=Number(ruler.value);lensOut.value=l===0?'0% POSITION':l===100?'100% DISTANCE':l+'% MORPH';rulerOut.value=th===0?'0\u00b0 RULER':th===180?'180\u00b0 \u00b7 A/B SWAPPED':th+'\u00b0 RULER';weaveOut.value=weave.value+'%';const lensMsg=l===0?'POSITION VIEW \u00b7 ORIGINAL FIGURE EIGHT':l===100?'DISTANCE VIEW \u00b7 ABOVE AND BELOW FOLD TOGETHER':'TRANSITION \u00b7 SAME THREE BODIES, DIFFERENT DESCRIPTION';const rulerMsg=th===180?'RULER 180\u00b0 \u00b7 A AND B HAVE SWAPPED \u00b7 SAME WORLD':'RULER '+th+'\u00b0';readout.textContent=lensMsg+' \u00b7 '+rulerMsg;history.length=0}
+function path(segment){ctx.beginPath();let started=false;for(let i=0;i<=430;i++){const t=i/430*TAU,pt=transforms(t,false);if(segment===1&&Math.sin(2*t)<0||segment===2&&Math.sin(2*t)>0){started=false;continue}const p=screen(pt);if(started)ctx.lineTo(p.x,p.y);else{ctx.moveTo(p.x,p.y);started=true}}}
+function draw(){ctx.clearRect(0,0,W,H);const l=Number(lens.value)/100,a=anchors();
+// Light graph-paper coordinates become measurements under the observation lens.
+ctx.save();ctx.strokeStyle='rgba(105,136,137,.09)';ctx.lineWidth=.8;const tick=Math.max(24,S*.19);for(let x=cx%tick;x<W;x+=tick){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=cy%tick;y<H;y+=tick){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}ctx.restore();
+if(l>.02){const av=l;ctx.save();ctx.globalAlpha=av;ctx.strokeStyle='#a6bec0';ctx.lineWidth=1.35;ctx.beginPath();ctx.moveTo(cx-S*1.48,cy+S*1.48);ctx.lineTo(cx+S*1.48,cy+S*1.48);ctx.moveTo(cx-S*1.48,cy+S*1.48);ctx.lineTo(cx-S*1.48,cy-S*1.48);ctx.stroke();ctx.font='700 10px ui-monospace,monospace';ctx.fillStyle='#288999';ctx.textAlign='center';ctx.fillText('DISTANCE FROM A',cx,cy+S*1.48+24);ctx.save();ctx.translate(cx-S*1.48-23,cy);ctx.rotate(-Math.PI/2);ctx.fillStyle='#bb7056';ctx.fillText('DISTANCE FROM B',0,0);ctx.restore();ctx.restore()}
+if(l<1){ctx.save();ctx.globalAlpha=1-l;const ag=S*1.47*.69;const pA={x:cx+S*1.47*a.ax,y:cy-S*1.95*a.ay},pB={x:cx+S*1.47*a.bx,y:cy-S*1.95*a.by};
+ // the ruler: the physical line through both anchors, free to turn
+ctx.setLineDash([4,5]);ctx.strokeStyle='#9db3b4';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(pA.x,pA.y);ctx.lineTo(pB.x,pB.y);ctx.stroke();ctx.setLineDash([]);
+for(const [i,p] of [pA,pB].entries()){ctx.strokeStyle=i?'#bb7056':'#278b99';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,15,0,TAU);ctx.stroke();ctx.fillStyle='#304750';ctx.font='700 11px ui-monospace,monospace';ctx.textAlign='center';ctx.fillText(i?'B':'A',p.x,p.y+4)}ctx.restore()}
+// Signed color reveals two passes in physical space that collapse to the same pair of distances.
+ctx.setLineDash([1,0]);path(0);ctx.lineWidth=9;ctx.strokeStyle='rgba(113,150,154,.06)';ctx.stroke();path(1);ctx.lineWidth=2.3;ctx.strokeStyle='rgba(35,142,159,.55)';ctx.stroke();path(2);ctx.strokeStyle='rgba(191,112,84,.61)';ctx.stroke();ctx.setLineDash([]);
+if(history.length>1){ctx.beginPath();for(let i=0;i<history.length;i++){let p=history[i];i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)}ctx.strokeStyle='rgba(38,60,70,.31)';ctx.lineWidth=3.9;ctx.stroke()}
+const val=transforms(phase),p=screen(val);if(l>.08){ctx.save();ctx.globalAlpha=l;ctx.setLineDash([3,6]);ctx.strokeStyle='rgba(54,95,102,.4)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,cy+S*1.48);ctx.moveTo(p.x,p.y);ctx.lineTo(cx-S*1.48,p.y);ctx.stroke();ctx.setLineDash([]);ctx.restore()}
+let glow=ctx.createRadialGradient(p.x,p.y,1,p.x,p.y,26);glow.addColorStop(0,'rgba(36,70,76,.22)');glow.addColorStop(1,'rgba(36,70,76,0)');ctx.fillStyle=glow;ctx.beginPath();ctx.arc(p.x,p.y,27,0,TAU);ctx.fill();ctx.fillStyle='#243e47';ctx.beginPath();ctx.arc(p.x,p.y,8.5,0,TAU);ctx.fill();ctx.fillStyle='white';ctx.beginPath();ctx.arc(p.x,p.y,2,0,TAU);ctx.fill();
+const annotation=l>.66?('C = ('+val.dA.toFixed(2)+' , '+val.dB.toFixed(2)+')'):('C / CROSSING PHASE '+(phase/TAU*100).toFixed(0)+'%');ctx.fillStyle='#496068';ctx.textAlign='left';ctx.font='700 11px ui-monospace,monospace';ctx.fillText(annotation,Math.min(W-180,Math.max(14,p.x+16)),Math.max(130,p.y-16));
+if(l>.5){const topY=H<650?H*.24:H*.245;ctx.textAlign='center';ctx.font='10px ui-monospace,monospace';ctx.fillStyle='rgba(72,100,106,.6)';ctx.fillText('SAME DISTANCES CAN HIDE TWO DIFFERENT POSITIONS',W/2,topY)}}
+function tick(now){const dt=Math.min(.05,(now-prior)/1000||0);prior=now;if(!paused){time+=dt;phase=(phase+dt*.85)%TAU;kx+=(-jx*.032-kx*.16)*(dt*60);ky+=(-jy*.032-ky*.16)*(dt*60);jx+=kx*(dt*60);jy+=ky*(dt*60);const p=screen(transforms(phase));history.push(p);if(history.length>240)history.shift()}draw();requestAnimationFrame(tick)}
+window.__RS11={transforms,anchors,disturb,reset}; // verification hook for headless QA
+document.getElementById('disturb').onclick=disturb;document.getElementById('reset').onclick=reset;pauseB.onclick=()=>{paused=!paused;pauseB.textContent=paused?'RESUME':'PAUSE'};lens.oninput=updateLabels;ruler.oninput=updateLabels;weave.oninput=()=>{weaveOut.value=weave.value+'%';history.length=0};c.addEventListener('pointerdown',disturb);window.addEventListener('resize',resize);window.addEventListener('keydown',e=>{if(['INPUT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.key.toLowerCase()==='d')disturb();if(e.key.toLowerCase()==='r')reset();if(e.key===' '){e.preventDefault();pauseB.click()}});resize();reset();requestAnimationFrame(tick);
+})();
+</script></body></html>
